@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilha de Vendas - Custos Automáticos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Planilha de Vendas</h1>
+
+        <div class="info">
+            <label>Retirada do Caixa (R$):</label>
+            <input type="number" id="retirada" value="0" step="0.01">
+
+            <label>Caixa Inicial (R$):</label>
+            <input type="number" id="caixaInicial" value="0" step="0.01">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Custo Unitário (R$)</th>
+                    <th>Preço Venda Unitário (R$)</th>
+                    <th>Quantidade Vendida</th>
+                    <th>Total Vendido (R$)</th>
+                    <th>Custo Total (R$)</th>
+                    <th>Lucro (R$)</th>
+                </tr>
+            </thead>
+
+            <tbody id="tabelaProdutos"></tbody>
+        </table>
+
+        <div class="resumo">
+            <h2>Resumo</h2>
+            <p><b>Total Vendido:</b> R$ <span id="totalVendido">0.00</span></p>
+            <p><b>Custo Total:</b> R$ <span id="custoTotal">0.00</span></p>
+            <p><b>Lucro Total:</b> R$ <span id="lucroTotal">0.00</span></p>
+            <p><b>Retirada:</b> R$ <span id="retiradaValor">0.00</span></p>
+            <p><b>Saldo Final no Caixa:</b> R$ <span id="saldoFinal">0.00</span></p>
+        </div>
+    </div>
+
+    <script>
+        const produtos = [
+            { nome: "Sal", custo: 0.35 },
+            { nome: "Açúcar", custo: 0.65 },
+            { nome: "Óleo de Milho", custo: 1.75 },
+            { nome: "Farinha de Milho", custo: 0.65 },
+            { nome: "Fermento", custo: 0.85 },
+
+            { nome: "Carne de Primeira", custo: 0.60 },
+            { nome: "Carne de Porco", custo: 0.60 },
+            { nome: "Carne de Ave", custo: 0.60 },
+            { nome: "Carne Fibrosa", custo: 0.60 },
+
+            { nome: "Ovos", custo: 0.15 },
+            { nome: "Leite", custo: 0.50 },
+            { nome: "Manteiga", custo: 1.00 },
+            { nome: "Queijo", custo: 1.80 },
+
+            { nome: "Polpas", custo: 0.75 },
+
+            { nome: "Café Moído", custo: 0.80 },
+            { nome: "Tabaco Moído", custo: 0.75 },
+            { nome: "Álcool", custo: 0.55 },
+            { nome: "Verniz", custo: 1.00 },
+
+            { nome: "Fertilizante", custo: 1.50 },
+            { nome: "Fibra", custo: 0.10 },
+            { nome: "Seiva", custo: 0.15 },
+            { nome: "Cultivo em Geral", custo: 0.25 },
+
+            { nome: "Lã", custo: 0.30 },
+            { nome: "Linha de Algodão", custo: 1.25 },
+            { nome: "Tábuas de madeira macia", custo: 0.30 },
+            { nome: "Tábuas de madeira dura", custo: 0.35 },
+
+            { nome: "Couro", custo: 0.25 }
+        ];
+
+        const tabela = document.getElementById("tabelaProdutos");
+
+        function criarTabela() {
+            produtos.forEach((p, index) => {
+                const linha = document.createElement("tr");
+
+                linha.innerHTML = `
+                    <td>${p.nome}</td>
+                    <td>${p.custo.toFixed(2)}</td>
+                    <td><input type="number" step="0.01" class="precoVenda" data-index="${index}" value="0"></td>
+                    <td><input type="number" step="1" class="quantidade" data-index="${index}" value="0"></td>
+                    <td><span class="totalVendidoProduto" id="totalVendidoProduto-${index}">0.00</span></td>
+                    <td><span class="custoTotalProduto" id="custoTotalProduto-${index}">0.00</span></td>
+                    <td><span class="lucroProduto" id="lucroProduto-${index}">0.00</span></td>
+                `;
+
+                tabela.appendChild(linha);
+            });
+        }
+
+        function atualizarCalculos() {
+            let totalVendido = 0;
+            let custoTotal = 0;
+            let lucroTotal = 0;
+
+            produtos.forEach((p, index) => {
+                const precoVenda = parseFloat(document.querySelector(`.precoVenda[data-index="${index}"]`).value) || 0;
+                const quantidade = parseFloat(document.querySelector(`.quantidade[data-index="${index}"]`).value) || 0;
+
+                const vendidoProduto = precoVenda * quantidade;
+                const custoProduto = p.custo * quantidade;
+                const lucroProduto = vendidoProduto - custoProduto;
+
+                document.getElementById(`totalVendidoProduto-${index}`).innerText = vendidoProduto.toFixed(2);
+                document.getElementById(`custoTotalProduto-${index}`).innerText = custoProduto.toFixed(2);
+                document.getElementById(`lucroProduto-${index}`).innerText = lucroProduto.toFixed(2);
+
+                totalVendido += vendidoProduto;
+                custoTotal += custoProduto;
+                lucroTotal += lucroProduto;
+            });
+
+            const retirada = parseFloat(document.getElementById("retirada").value) || 0;
+            const caixaInicial = parseFloat(document.getElementById("caixaInicial").value) || 0;
+
+            const saldoFinal = (caixaInicial + totalVendido) - retirada;
+
+            document.getElementById("totalVendido").innerText = totalVendido.toFixed(2);
+            document.getElementById("custoTotal").innerText = custoTotal.toFixed(2);
+            document.getElementById("lucroTotal").innerText = lucroTotal.toFixed(2);
+            document.getElementById("retiradaValor").innerText = retirada.toFixed(2);
+            document.getElementById("saldoFinal").innerText = saldoFinal.toFixed(2);
+        }
+
+        document.addEventListener("input", atualizarCalculos);
+
+        criarTabela();
+        atualizarCalculos();
+    </script>
+
+</body>
+</html>
