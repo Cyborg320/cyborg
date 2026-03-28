@@ -1,63 +1,282 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Planilha Fazenda</title>
-    <script>
-        // Load saved data from localStorage when the page loads
-        window.onload = function() {
-            loadSavedData();
-        };
-
-        // Function to load saved data
-        function loadSavedData() {
-            const savedData = localStorage.getItem('planilhaData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                // Populate your inputs with saved data here
-                document.getElementById('saldoFinal').value = data.saldoFinal;
-                // Add other elements as needed
-            }
-        }
-
-        // Auto-save data on every input change
-        function autoSave() {
-            const saldoFinal = document.getElementById('saldoFinal').value;
-            const dataToSave = { saldoFinal: saldoFinal }; // Add other fields to save
-            localStorage.setItem('planilhaData', JSON.stringify(dataToSave));
-        }
-
-        // Event listeners for auto-save
-        document.getElementById('saldoFinal').addEventListener('input', autoSave);
-        // Add more event listeners as needed
-
-        // Function to finalize the day
-        function finalizarDia() {
-            const saldoFinal = document.getElementById('saldoFinal').value;
-            const caixaInicial = document.getElementById('caixaInicial');
-
-            caixaInicial.value = parseFloat(caixaInicial.value) + parseFloat(saldoFinal);
-            // Clear all product inputs and retirada
-            clearInputs();
-            // Save changes
-            autoSave();
-        }
-
-        // Function to clear inputs
-        function clearInputs() {
-            // Clear your inputs here
-            document.getElementById('saldoFinal').value = '';
-            // Clear other fields as needed
-        }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistema Fazenda - Profissional</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <h1>Planilha Fazenda</h1>
-    <label for="saldoFinal">Saldo Final:</label>
-    <input type="text" id="saldoFinal" />
-    <br />
-    <label for="caixaInicial">Caixa Inicial:</label>
-    <input type="text" id="caixaInicial" />
-    <br />
-    <button onclick="finalizarDia()">Finalizar Dia</button>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🌾 Fazenda</h2>
+        <p>Sistema Profissional</p>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-btn active" data-page="dashboard">🏠 Dashboard</button>
+        <button class="menu-btn" data-page="vendas">🛒 Vendas</button>
+        <button class="menu-btn" data-page="estoque">📦 Estoque</button>
+        <button class="menu-btn" data-page="catalogo">🖼️ Catálogo</button>
+        <button class="menu-btn" data-page="historico">📜 Histórico</button>
+        <button class="menu-btn" data-page="relatorios">📊 Relatórios</button>
+      </nav>
+
+      <div class="footer">
+        <p>📌 Dados salvos automaticamente</p>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page">
+        <h1>🏠 Dashboard</h1>
+
+        <div class="card">
+          <h2>📅 Caixa do Dia</h2>
+
+          <div class="grid">
+            <div class="field">
+              <label>Data</label>
+              <input type="date" id="dataDia">
+            </div>
+
+            <div class="field">
+              <label>Caixa Inicial (R$)</label>
+              <input type="number" id="caixaInicial" step="0.01" value="0">
+            </div>
+
+            <div class="field">
+              <label>Retirada (R$)</label>
+              <input type="number" id="retirada" step="0.01" value="0">
+            </div>
+
+            <div class="field">
+              <label>Motivo Retirada</label>
+              <input type="text" id="motivoRetirada" placeholder="Ex: compra de insumo">
+            </div>
+
+            <div class="field">
+              <label>Responsável</label>
+              <input type="text" id="responsavelRetirada" placeholder="Ex: Theo">
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <p>Total Vendido</p>
+              <h3>R$ <span id="totalVendido">0.00</span></h3>
+            </div>
+
+            <div class="stat">
+              <p>Custo Total</p>
+              <h3>R$ <span id="custoTotal">0.00</span></h3>
+            </div>
+
+            <div class="stat">
+              <p>Lucro Total</p>
+              <h3>R$ <span id="lucroTotal">0.00</span></h3>
+            </div>
+
+            <div class="stat">
+              <p>Retirada</p>
+              <h3>R$ <span id="retiradaValor">0.00</span></h3>
+            </div>
+
+            <div class="stat destaque">
+              <p>Saldo Final</p>
+              <h3>R$ <span id="saldoFinal">0.00</span></h3>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn green" id="btnFecharCaixa">✅ Fechar Caixa</button>
+            <button class="btn yellow" id="btnReabrirCaixa">🔓 Reabrir Caixa</button>
+            <button class="btn red" id="btnLimparDia">🧹 Limpar Dia</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VENDAS -->
+      <section id="page-vendas" class="page hidden">
+        <h1>🛒 Vendas</h1>
+
+        <div class="card">
+          <h2>🔍 Filtros</h2>
+
+          <div class="grid">
+            <div class="field">
+              <label>Pesquisar Produto</label>
+              <input type="text" id="pesquisaProduto" placeholder="Digite o nome do produto...">
+            </div>
+
+            <div class="field">
+              <label>Categoria</label>
+              <select id="filtroCategoria"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📦 Tabela de Vendas</h2>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Categoria</th>
+                  <th>Custo</th>
+                  <th>Preço Venda</th>
+                  <th>Qtd Vendida</th>
+                  <th>Total</th>
+                  <th>Custo Total</th>
+                  <th>Lucro</th>
+                  <th>Estoque</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaVendas"></tbody>
+            </table>
+          </div>
+
+          <div class="actions">
+            <button class="btn blue" id="btnExportarVendasCSV">📤 Exportar CSV (Vendas)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ESTOQUE -->
+      <section id="page-estoque" class="page hidden">
+        <h1>📦 Estoque</h1>
+
+        <div class="card">
+          <h2>➕ Criar Produto Novo</h2>
+
+          <div class="grid">
+            <div class="field">
+              <label>Categoria</label>
+              <input type="text" id="novoCategoria" placeholder="Ex: Agricultura">
+            </div>
+
+            <div class="field">
+              <label>Nome Produto</label>
+              <input type="text" id="novoNome" placeholder="Ex: Polpa de Manga">
+            </div>
+
+            <div class="field">
+              <label>Custo Unitário</label>
+              <input type="number" id="novoCusto" step="0.01" value="0">
+            </div>
+
+            <div class="field">
+              <label>Quantidade Inicial</label>
+              <input type="number" id="novoEstoque" step="1" value="0">
+            </div>
+
+            <div class="field">
+              <label>Imagem (URL opcional)</label>
+              <input type="text" id="novoImagem" placeholder="Cole link da imagem">
+            </div>
+          </div>
+
+          <button class="btn green" id="btnCriarProduto">Adicionar Produto</button>
+        </div>
+
+        <div class="card">
+          <h2>📦 Lista do Estoque</h2>
+
+          <div class="grid">
+            <div class="field">
+              <label>Pesquisar Estoque</label>
+              <input type="text" id="pesquisaEstoque" placeholder="Pesquisar produto...">
+            </div>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Categoria</th>
+                  <th>Custo</th>
+                  <th>Estoque</th>
+                  <th>Entrada</th>
+                  <th>Salvar</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaEstoque"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATALOGO -->
+      <section id="page-catalogo" class="page hidden">
+        <h1>🖼️ Catálogo de Produtos</h1>
+
+        <div class="card">
+          <h2>🔍 Pesquisa</h2>
+          <input type="text" id="pesquisaCatalogo" placeholder="Pesquisar no catálogo...">
+        </div>
+
+        <div class="catalogo" id="catalogoProdutos"></div>
+      </section>
+
+      <!-- HISTORICO -->
+      <section id="page-historico" class="page hidden">
+        <h1>📜 Histórico Completo</h1>
+
+        <div class="card">
+          <h2>📅 Fechamentos</h2>
+          <div id="historicoLista"></div>
+
+          <div class="actions">
+            <button class="btn blue" id="btnExportarHistoricoCSV">📤 Exportar Histórico CSV</button>
+            <button class="btn red" id="btnLimparHistorico">🗑️ Apagar Histórico</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RELATORIOS -->
+      <section id="page-relatorios" class="page hidden">
+        <h1>📊 Relatórios</h1>
+
+        <div class="card">
+          <h2>Resumo</h2>
+
+          <div class="stats">
+            <div class="stat">
+              <p>Total Semana</p>
+              <h3>R$ <span id="totalSemana">0.00</span></h3>
+            </div>
+
+            <div class="stat">
+              <p>Lucro Semana</p>
+              <h3>R$ <span id="lucroSemana">0.00</span></h3>
+            </div>
+
+            <div class="stat">
+              <p>Total Mês</p>
+              <h3>R$ <span id="totalMes">0.00</span></h3>
+            </div>
+
+            <div class="stat">
+              <p>Lucro Mês</p>
+              <h3>R$ <span id="lucroMes">0.00</span></h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
